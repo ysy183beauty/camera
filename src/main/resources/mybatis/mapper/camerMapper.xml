@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.camera.dao.CamerMapper">
+  <resultMap id="BaseResultMap" type="com.camera.entity.Camera">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="camera_name" jdbcType="VARCHAR" property="cameraName" />
+    <result column="camera_type" jdbcType="VARCHAR" property="cameraType" />
+    <result column="ratio" jdbcType="VARCHAR" property="ratio" />
+    <result column="bit_rate" jdbcType="VARCHAR" property="bitRate" />
+    <result column="ip_address" jdbcType="VARCHAR" property="ipAdrres" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="main_equipment_type" jdbcType="VARCHAR" property="mainEquipmentType" />
+    <result column="server_ip" jdbcType="VARCHAR" property="serverIp" />
+    <result column="lng" jdbcType="DOUBLE" property="lng" />
+    <result column="lat" jdbcType="DOUBLE" property="lat" />
+    <result column="second_directory" jdbcType="VARCHAR" property="secondDirectory" />
+    <result column="third_directory" jdbcType="VARCHAR" property="thirdDirectory" />
+    <result column="four_directory" jdbcType="VARCHAR" property="fourDirectory" />
+    <result column="five_directory" jdbcType="VARCHAR" property="fiveDirectory" />
+    <result column="six_directory" jdbcType="VARCHAR" property="sixDirectory" />
+    <result column="is_normal" jdbcType="INTEGER" property="is_normal" />
+    <result column="pageInfo" jdbcType="VARCHAR" property="pageInfo" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="pass_word" jdbcType="VARCHAR" property="passWord" />
+    <result column="bd_lng" jdbcType="DOUBLE" property="bdLng" />
+    <result column="bd_lat" jdbcType="DOUBLE" property="bdLat" />
+    <result column="region_name" jdbcType="VARCHAR" property="regionName" />
+  </resultMap>
+  <resultMap id="BaseResultEntityMap" type="com.camera.entity.CameraEntity">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="camera_name" jdbcType="VARCHAR" property="cameraName" />
+    <result column="lng" jdbcType="DOUBLE" property="lng" />
+    <result column="lat" jdbcType="DOUBLE" property="lat" />
+    <result column="bd_lng" jdbcType="DOUBLE" property="bdLng" />
+    <result column="bd_lat" jdbcType="DOUBLE" property="bdLat" />
+  </resultMap>
+  <!--查询数据库中总记录数 -->
+  <select id="selectTotal" resultType="Integer" parameterType="Map">
+    select COUNT(1) from t_camera_base where is_normal=0
+    <if test="cameraName!=null and cameraName!=''">
+      and camera_name LIKE '%${cameraName}%'
+    </if>
+  </select>
+  <!-- 查询所有数据信息-->
+  <select id="selectAll" parameterType="Map" resultMap="BaseResultMap">
+    select * from t_camera_base where is_normal=0
+    <if test="cameraName!=null and cameraName!=''">
+      and camera_name LIKE '%${cameraName}%'
+    </if>
+    ORDER BY camera_name ASC
+    limit #{pagestart},#{pagesize}
+  </select>
+  <select id="selectBaseInfo" resultMap="BaseResultMap">
+     select * from t_camera_base where is_normal=0
+  </select>
+  <update id="updateBatchBaseCarmera"  parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      update t_camera_base set bd_lng=${item.bdLng},bd_lat=${item.bdLat}
+      where id = ${item.id}
+    </foreach>
+  </update>
+  <insert id="addCameraInfo" parameterType="com.camera.entity.Camera">
+     insert into t_camera_base(camera_name,lng,lat,bd_lng,bd_lat,region_name)
+     VALUES(#{cameraName,jdbcType=VARCHAR}, #{lng,jdbcType=DOUBLE},#{lat,jdbcType=DOUBLE},
+     #{bdLng,jdbcType=DOUBLE},#{bdLat,jdbcType=DOUBLE},#{regionName,jdbcType=VARCHAR})
+  </insert>
+  <select id="selectCameraById" parameterType="Integer" resultMap="BaseResultMap">
+    select * from t_camera_base where id=${_parameter}
+  </select>
+  <update id="updateCamera" parameterType="com.camera.entity.Camera">
+     update t_camera_base set lng=#{lng,jdbcType=DOUBLE},lat=#{lat,jdbcType=DOUBLE},
+     bd_lng=#{bdLng,jdbcType=DOUBLE},bd_lat=#{bdLat,jdbcType=DOUBLE} where id=#{id,jdbcType=INTEGER}
+  </update>
+  <!--通过多个主键查询数据信息 -->
+  <select id="selectCarmersByIds" resultMap="BaseResultMap">
+    select * from t_camera_base where is_normal=0 and id in
+    <foreach item="item" index="index" collection="list"
+             open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
+  <!--查询摄像头数据信息 -->
+  <select id="selectCarmers" resultMap="BaseResultEntityMap">
+     select c.id,c.camera_name,c.lng,c.lat,c.bd_lng,c.bd_lat from t_camera_base c where c.is_normal=0
+  </select>
+</mapper>
